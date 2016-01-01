@@ -1128,6 +1128,20 @@
 #	define SEMOP_OPS	m2_l1
 #	define SEMOP_SIZE	m2_i2
 
+/* Semaphores processes */
+#define IPC_PROCSEM_INIT        (IPC_BASE+8)
+#       define PROCSEM_INIT_PID         m2_i1
+#       define PROCSEM_INIT_SIZE        m2_l1
+#define IPC_PROCSEM_GET         (IPC_BASE+9)
+#       define PROCSEM_GET_PID          m2_i1
+#       define PROCSEM_GET_KEY          m2_l1
+#       define PROCSEM_GET_INDEX        m2_l2
+#define IPC_PROCSEM_INHERIT     (IPC_BASE+10)
+#       define PROCSEM_INHERIT_PID_PARENT       m2_i1
+#       define PROCSEM_INHERIT_PID_SON          m2_i2
+#define IPC_PROCSEM_EXIT        (IPC_BASE+11)
+#       define PROCSEM_EXIT_PID          m2_i1
+
 /*===========================================================================*
  *                Messages for Scheduling				     *
  *===========================================================================*/
