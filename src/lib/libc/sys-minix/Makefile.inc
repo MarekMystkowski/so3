@@ -22,5 +22,5 @@ SRCS+= 	accept.c access.c bind.c brk.c sbrk.c m_closefrom.c getsid.c \
 SRCS+= cprofile.c lseek64.c sprofile.c _mcontext.c
 
 # IPC: semaphores processes
-SERC+= proc_sem.c
+SRCS+= proc_sem.c
 .include "${ARCHDIR}/sys-minix/Makefile.inc"
