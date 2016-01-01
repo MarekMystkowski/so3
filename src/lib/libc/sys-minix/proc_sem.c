@@ -1,7 +1,6 @@
 #define _SYSTEM 1
 #define _MINIX 1
 
-
 #include <sys/cdefs.h>
 #include <lib.h>
 
@@ -10,6 +9,7 @@
 #include <lib.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <sys/sem.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
