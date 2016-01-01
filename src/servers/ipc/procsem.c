@@ -1,11 +1,10 @@
 #include "inc.h"
-
 #define MAX_PID 30000
 #define MAX_KEY 1000
-#define ESIZE -10		// USUNAC TO STAD !!
 
 /* It allows you to use: semctl, semget. */
-int _semget(key_t key, int nsems, int flag){
+int _semget(key_t key, int nsems, int flag)
+{
 	message m;
 	m.SEMGET_KEY = key;
 	m.SEMGET_NR = nsems;
@@ -16,7 +15,8 @@ int _semget(key_t key, int nsems, int flag){
 	return -1;
 }
 
-int _semctl(int id, int num, int cmd, long opt ){
+int _semctl(int id, int num, int cmd, long opt )
+{
 	message m;
 	m.SEMCTL_ID = id;
 	m.SEMCTL_NUM = num;
@@ -30,7 +30,6 @@ int _semctl(int id, int num, int cmd, long opt ){
 
 #define semget(x, y, z) _semget(x, y, z)
 #define semctl(a, b, c, d) _semctl(a, b, c,(long) d)
-
 
 struct proc {
 	key_t key_sem;			
@@ -102,11 +101,14 @@ int do_procsem_init(message *m)
 
 	key = create_sem(length);
 	if(key == -1)
-	    	return ESIZE;
+	    	return -1 /*ESIZE*/;
 
 	tab_sem[key].how_many_uses = 1;
+	tab_sem[key].length = length;
 	tab_proc[pid].key_sem = key;
 	tab_proc[pid].has = 1;
+	
+	printf("IPC proc_sem: init key = %d, len = %d, pid = %d\n", key, length, pid);
 
 	return OK;
 }
@@ -119,14 +121,19 @@ int do_procsem_get(message *m)
 	key_t key;
 	pid_t pid = m->PROCSEM_GET_PID ;
 	size_t index = m->PROCSEM_GET_INDEX;
+	
+	printf("IPC proc_sem: get index = %d, pid = %d\n", index, pid);
 
 	if (!tab_proc[pid].has)
 		return EINVAL;
 	key =  tab_proc[pid].key_sem;
-	if (!index < tab_sem[key].length)  
+	if (index > tab_sem[key].length)  
 		return EINVAL;
 
 	m->PROCSEM_GET_KEY = key;
+
+	printf("IPC proc_sem: get: return key = %d\n", key);
+
 	return OK;
 }
 
@@ -135,8 +142,10 @@ int do_procsem_get(message *m)
  *===========================================================================*/
 int do_procsem_inherit(message *m)
 {
-    	pid_t pid_parent = m->PROCSEM_INHERIT_PID_PARENT ;
-        pid_t pid_son = m->PROCSEM_INHERIT_PID_SON ;
+	pid_t pid_parent = m->PROCSEM_INHERIT_PID_PARENT ;
+	pid_t pid_son = m->PROCSEM_INHERIT_PID_SON ;
+	
+	printf("IPC proc_inhe: parent = %d, son = %d\n", pid_parent, pid_son);
 	
 	tab_proc[pid_son].has = 0;
 	tab_proc[pid_son].key_sem = 0;
@@ -157,6 +166,9 @@ int do_procsem_inherit(message *m)
 int do_procsem_exit(message *m)
 {
     pid_t pid = m->PROCSEM_EXIT_PID;
+    
+    printf("IPC proc_exit: pid = %d\n", pid);
+    
     if (release_semaphores(pid) != OK)
 		printf("Error in do_procsem_exit()\n");
 
