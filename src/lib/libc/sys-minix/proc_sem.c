@@ -19,12 +19,12 @@
 static int send_message_to_IPS(int syscallnr, message *m)
 {
 	endpoint_t ipc_pt;
-	if(minix_rs_lookup("ipc", ipc_pt) != OK)
+	if(minix_rs_lookup("ipc", &ipc_pt) != OK)
 	{
 		errno = ENOSYS;
 		return -1;
 	}
-	return (_syscall(ipc_pt, syscallnr, &m));
+	return (_syscall(ipc_pt, syscallnr, m));
 }
 
 int proc_sem_init(size_t n)
