@@ -29,6 +29,11 @@
 #include "mproc.h"
 #include "param.h"
 
+#include <lib.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "../../lib/libc/sys-minix/minix_rs.c"
+
 #define LAST_FEW            2	/* last few slots reserved for superuser */
 
 static void zombify(struct mproc *rmp);
@@ -37,7 +42,7 @@ static void tell_parent(struct mproc *child);
 static void tell_tracer(struct mproc *child);
 static void tracer_died(struct mproc *child);
 static void cleanup(register struct mproc *rmp);
-
+static int enabled_server_ipc;
 /*===========================================================================*
  *				do_fork					     *
  *===========================================================================*/
@@ -50,7 +55,7 @@ int do_fork()
   static unsigned int next_child = 0;
   int i, n = 0, s;
   endpoint_t child_ep;
-  message m;
+  message m, m_ipc;
 
  /* If tables might fill up during FORK, don't even start since recovery half
   * way through is such a nuisance.
@@ -112,7 +117,17 @@ int do_fork()
   /* Find a free pid for the child and put it in the table. */
   new_pid = get_free_pid();
   rmc->mp_pid = new_pid;	/* assign pid to child */
-
+  
+  /* sending message to server IPC */
+  if(enabled_server_ipc)
+  {
+    m_ipc.PROCSEM_INHERIT_PID_SON = new_pid;
+    m_ipc.PROCSEM_INHERIT_PID_PARENT = rmp->mp_pid;
+    endpoint_t ipc_ep;
+    minix_rs_lookup("ipc", &ipc_ep);
+    _syscall(ipc_ep, IPC_PROCSEM_INHERIT, &m_ipc);
+  }
+  
   m.m_type = PM_FORK;
   m.PM_PROC = rmc->mp_endpoint;
   m.PM_PPROC = rmp->mp_endpoint;
@@ -237,6 +252,17 @@ int do_exit()
   * do not use PM's exit() to terminate. If they try to, we warn the user
   * and send a SIGKILL signal to the system process.
   */
+  
+  /* sending message to server IPC */
+  if(enabled_server_ipc)
+  {
+    message m_ipc;
+    m_ipc.PROCSEM_EXIT_PID = mp->mp_pid;
+    endpoint_t ipc_ep;
+    minix_rs_lookup("ipc", &ipc_ep);
+    _syscall(ipc_ep, IPC_PROCSEM_EXIT, &m_ipc);
+  }  
+  
   if(mp->mp_flags & PRIV_PROC) {
       printf("PM: system process %d (%s) tries to exit(), sending SIGKILL\n",
           mp->mp_endpoint, mp->mp_name);
@@ -727,3 +753,13 @@ register struct mproc *rmp;	/* tells which process is exiting */
   procs_in_use--;
 }
 
+/*===========================================================================*
+ *                       do_startstop_server_ipc                             *
+ *===========================================================================*/
+void do_startstop_server_ipc()
+{
+  if (enabled_server_ipc)
+     enabled_server_ipc = 0;
+  else 
+     enabled_server_ipc = 1;
+}

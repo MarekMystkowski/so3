@@ -1,4 +1,9 @@
 #include "inc.h"
+#include <lib.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "../../lib/libc/sys-minix/minix_rs.c"
+#include <minix/com.h>
 
 int identifier = 0x1234;
 endpoint_t who_e;
@@ -34,8 +39,12 @@ static void sef_cb_signal_handler(int signo);
 
 int main(int argc, char *argv[])
 {
+	printf("IPC server started.\n");
 	message m;
-
+	
+	 /* sending message to server PM */
+    _syscall(PM_PROC_NR, PM_START_IPC, &m);
+	
 	/* SEF local startup. */
 	env_setargs(argc, argv);
 	sef_local_startup();
@@ -116,6 +125,10 @@ int main(int argc, char *argv[])
 	}
 
 	/* no way to get here */
+	
+	/* sending message to server PM */
+    _syscall(PM_PROC_NR, PM_STOP_IPC, &m_ipc);
+    
 	return -1;
 }
 

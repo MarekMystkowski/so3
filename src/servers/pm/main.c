@@ -70,9 +70,17 @@ int main()
 	  if (sef_receive_status(ANY, &m_in, &ipc_status) != OK)
 		  panic("PM sef_receive_status error");
 	  who_e = m_in.m_source;	/* who sent the message */
+	  call_nr = m_in.m_type;	/* system call number */
+	  
+	  /* Service calls to server ipc. */
+	  if(call_nr == PM_STOP_IPC || call_nr == PM_START_IPC) {
+		  do_startstop_server_ipc();
+		  continue;
+	  }
+	  
 	  if(pm_isokendpt(who_e, &who_p) != OK)
 		  panic("PM got message from invalid endpoint: %d", who_e);
-	  call_nr = m_in.m_type;	/* system call number */
+	  
 
 	  /* Process slot of caller. Misuse PM's own process slot if the kernel is
 	   * calling. This can happen in case of synchronous alarms (CLOCK) or or

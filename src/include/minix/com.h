@@ -746,7 +746,7 @@
 #  define FKEY_SFKEYS	      m2_l2	/* Shift-F1-F12 keys pressed */
 
 /*===========================================================================*
- *                Messages used between PM and VFS			     *
+ *                Messages used between PM, VFS	and IPC		     *
  *===========================================================================*/
 
 #define PM_RQ_BASE	0x900
@@ -778,6 +778,10 @@
 #define PM_UNPAUSE_REPLY	(PM_RS_BASE + 9)
 #define PM_REBOOT_REPLY	(PM_RS_BASE + 10)
 #define PM_SETGROUPS_REPLY	(PM_RS_BASE + 11)
+
+/* Messages from IPC to PM  */
+#define PM_START_IPC	(PM_RS_BASE + 12)
+#define PM_STOP_IPC	(PM_RS_BASE + 13)
 
 /* Standard parameters for all requests and replies, except PM_REBOOT */
 #  define PM_PROC		m7_i1	/* process endpoint */

@@ -28,6 +28,7 @@
 #include "sanitycheck.h"
 #include "region.h"
 
+
 /*===========================================================================*
  *				do_fork					     *
  *===========================================================================*/
@@ -56,7 +57,7 @@ int do_fork(message *msg)
   vmp = &vmproc[proc];		/* parent */
   vmc = &vmproc[childproc];	/* child */
   assert(vmc->vm_slot == childproc);
-
+  
   /* The child is basically a copy of the parent. */
   origpt = vmc->vm_pt;
   *vmc = *vmp;
