@@ -46,6 +46,10 @@ int is_sem_nil(void);
 int is_shm_nil(void);
 void sem_process_vm_notify(void);
 
+/* used by the proc_sem.c to manage semaphores with sem.c */
+int do_remove_semaphore(int id);
+
+
 EXTERN int identifier;
 EXTERN endpoint_t who_e;
 EXTERN int call_type;

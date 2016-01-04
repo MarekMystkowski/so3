@@ -612,3 +612,17 @@ void sem_process_vm_notify(void)
 		printf("IPC: query exit error!\n");
 }
 
+/*===========================================================================*
+ *				do_remove_semaphore 	     		     *
+ *===========================================================================*/
+int do_remove_semaphore(int id){
+	struct sem_struct *sem;
+	
+	if (!(sem = sem_find_id(id))) {
+		return -1;
+	}
+	
+	update_one_semaphore(sem, 1);
+	
+	return OK;
+}

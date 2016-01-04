@@ -1,4 +1,5 @@
 #include "inc.h"
+#include <errno.h>
 #define MAX_PID 30000
 #define MAX_KEY 1000
 #define debug 0
@@ -17,21 +18,8 @@ int _semget(key_t key, int nsems, int flag)
 	return -1;
 }
 
-int _semctl(int id, int num, int cmd, long opt )
-{
-	message m;
-	m.SEMCTL_ID = id;
-	m.SEMCTL_NUM = num;
-	m.SEMCTL_CMD = cmd;
-	m.SEMCTL_OPT = opt;
-	int x =  do_semctl(&m);
-	if (x == OK)
-		return m.SHMCTL_RET;
-	return -1;
-}
-
 #define semget(x, y, z) _semget(x, y, z)
-#define semctl(a, b, c, d) _semctl(a, b, c,(long) d)
+
 
 struct proc {
 	key_t key_sem;			
@@ -81,12 +69,13 @@ static int release_semaphores(pid_t pid)
 	tab_sem[key_sem].how_many_uses--;
 	if (tab_sem[key_sem].how_many_uses == 0) {
 		// removing segment semaphore
-	    	if (semctl(tab_sem[key_sem].id, 0, IPC_RMID, 0) == -1){
+	    	if (do_remove_semaphore(tab_sem[key_sem].id) == -1){
+				printf("Blad w usuwaniu semafora key=%d\n",key_sem);
 		    	return -1;
-		}
+			}
 		tab_sem[key_sem].id = 0;
 		tab_sem[key_sem].length = 0;
-		if(debug_sem) printf("IPC: release semaphores key = %d\n" , key);
+		if(debug_sem) printf("IPC: release semaphores key = %d\n" , key_sem);
 	}
 	return OK;
 }
