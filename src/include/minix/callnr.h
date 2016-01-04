@@ -54,7 +54,9 @@
 #define LSTAT		  53
 #define IOCTL		  54
 #define FCNTL		  55
+#define START_IPC	  56
 #define FS_READY	  57
+#define STOP_IPC	  58
 #define EXEC		  59
 #define UMASK		  60 
 #define CHROOT		  61 

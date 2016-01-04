@@ -2,8 +2,8 @@
 #include <lib.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "../../lib/libc/sys-minix/minix_rs.c"
 #include <minix/com.h>
+#include <errno.h>
 
 int identifier = 0x1234;
 endpoint_t who_e;
@@ -36,19 +36,21 @@ static int verbose = 0;
 static void sef_local_startup(void);
 static int sef_cb_init_fresh(int type, sef_init_info_t *info);
 static void sef_cb_signal_handler(int signo);
-
 int main(int argc, char *argv[])
 {
 	printf("IPC server started.\n");
-	message m;
+	message m, m2;
 	
-	 /* sending message to server PM */
-    _syscall(PM_PROC_NR, PM_START_IPC, &m);
+	
 	
 	/* SEF local startup. */
 	env_setargs(argc, argv);
 	sef_local_startup();
-
+	
+	/* sending message to server PM */
+	if( _syscall(PM_PROC_NR, START_IPC, &m2))
+		printf("ERROR IN IPC MAIN: %d\n", errno);
+	
 	while (TRUE) {
 		int r;
 		int ipc_number;
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
 			}
 
 			result = ipc_calls[ipc_number].func(&m);
-
+		
 			/*
 			 * The handler of the IPC call did not
 			 * post a reply.
@@ -126,8 +128,9 @@ int main(int argc, char *argv[])
 
 	/* no way to get here */
 	
+	printf("Server IPC stoped.\n");
 	/* sending message to server PM */
-    _syscall(PM_PROC_NR, PM_STOP_IPC, &m_ipc);
+    _syscall(PM_PROC_NR, STOP_IPC, &m);
     
 	return -1;
 }

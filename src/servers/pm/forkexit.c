@@ -43,6 +43,7 @@ static void tell_tracer(struct mproc *child);
 static void tracer_died(struct mproc *child);
 static void cleanup(register struct mproc *rmp);
 static int enabled_server_ipc;
+static int tmp;
 /*===========================================================================*
  *				do_fork					     *
  *===========================================================================*/
@@ -56,6 +57,7 @@ int do_fork()
   int i, n = 0, s;
   endpoint_t child_ep;
   message m, m_ipc;
+  //if(tmp++ >800)enabled_server_ipc = 1;
 
  /* If tables might fill up during FORK, don't even start since recovery half
   * way through is such a nuisance.
@@ -754,12 +756,17 @@ register struct mproc *rmp;	/* tells which process is exiting */
 }
 
 /*===========================================================================*
- *                       do_startstop_server_ipc                             *
+ *                       do_start_server_ipc                             *
  *===========================================================================*/
-void do_startstop_server_ipc()
+void do_start_server_ipc()
 {
-  if (enabled_server_ipc)
-     enabled_server_ipc = 0;
-  else 
-     enabled_server_ipc = 1;
+   enabled_server_ipc = 1;
+}
+
+/*===========================================================================*
+ *                       do_stop_server_ipc                             *
+ *===========================================================================*/
+void do_stop_server_ipc()
+{
+   enabled_server_ipc = 0;
 }

@@ -30,6 +30,8 @@ void exit_proc(struct mproc *rmp, int exit_status, int dump_core);
 void exit_restart(struct mproc *rmp, int dump_core);
 int do_waitpid(void);
 int wait_test(struct mproc *rmp, struct mproc *child);
+void do_start_server_ipc();
+void do_stop_server_ipc();
 
 /* getset.c */
 int do_get(void);
@@ -103,3 +105,4 @@ struct mproc *find_proc(pid_t lpid);
 int nice_to_priority(int nice, unsigned *new_q);
 int pm_isokendpt(int ep, int *proc);
 void tell_vfs(struct mproc *rmp, message *m_ptr);
+
