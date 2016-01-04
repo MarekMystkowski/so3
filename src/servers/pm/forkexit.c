@@ -760,6 +760,7 @@ register struct mproc *rmp;	/* tells which process is exiting */
  *===========================================================================*/
 void do_start_server_ipc()
 {
+   printf("PM: start server IPC\n");
    enabled_server_ipc = 1;
 }
 
@@ -768,5 +769,6 @@ void do_start_server_ipc()
  *===========================================================================*/
 void do_stop_server_ipc()
 {
+   printf("PM: stop server IPC\n");
    enabled_server_ipc = 0;
 }

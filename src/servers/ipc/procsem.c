@@ -1,6 +1,8 @@
 #include "inc.h"
 #define MAX_PID 30000
 #define MAX_KEY 1000
+#define debug 0
+#define debug_sem 1
 
 /* It allows you to use: semctl, semget. */
 int _semget(key_t key, int nsems, int flag)
@@ -62,6 +64,7 @@ static key_t create_sem(size_t lenght)
 		unused_key = key % MAX_KEY + 1;
 		tab_sem[key].length = lenght;
 		tab_sem[key].id = x;
+		if(debug_sem) printf("IPC: new semaphores key = %d\n" , key);
 		return key;
 	}
 	return -1;
@@ -83,6 +86,7 @@ static int release_semaphores(pid_t pid)
 		}
 		tab_sem[key_sem].id = 0;
 		tab_sem[key_sem].length = 0;
+		if(debug_sem) printf("IPC: release semaphores key = %d\n" , key);
 	}
 	return OK;
 }
@@ -108,7 +112,7 @@ int do_procsem_init(message *m)
 	tab_proc[pid].key_sem = key;
 	tab_proc[pid].has = 1;
 	
-	printf("IPC proc_sem: init key = %d, len = %d, pid = %d\n", key, length, pid);
+	if(debug)printf("IPC proc_sem: init key = %d, len = %d, pid = %d\n", key, length, pid);
 
 	return OK;
 }
@@ -122,7 +126,7 @@ int do_procsem_get(message *m)
 	pid_t pid = m->PROCSEM_GET_PID ;
 	size_t index = m->PROCSEM_GET_INDEX;
 	
-	printf("IPC proc_sem: get index = %d, pid = %d\n", index, pid);
+	if(debug)printf("IPC proc_sem: get index = %d, pid = %d\n", index, pid);
 
 	if (!tab_proc[pid].has)
 		return EINVAL;
@@ -132,7 +136,7 @@ int do_procsem_get(message *m)
 
 	m->PROCSEM_GET_KEY = key;
 
-	printf("IPC proc_sem: get: return key = %d\n", key);
+	if(debug)printf("IPC proc_sem: get: return key = %d\n", key);
 
 	return OK;
 }
@@ -145,7 +149,7 @@ int do_procsem_inherit(message *m)
 	pid_t pid_parent = m->PROCSEM_INHERIT_PID_PARENT ;
 	pid_t pid_son = m->PROCSEM_INHERIT_PID_SON ;
 	
-	printf("IPC proc_inhe: parent = %d, son = %d\n", pid_parent, pid_son);
+	if(debug)printf("IPC proc_inhe: parent = %d, son = %d\n", pid_parent, pid_son);
 	
 	tab_proc[pid_son].has = 0;
 	tab_proc[pid_son].key_sem = 0;
@@ -167,7 +171,7 @@ int do_procsem_exit(message *m)
 {
     pid_t pid = m->PROCSEM_EXIT_PID;
     
-    printf("IPC proc_exit: pid = %d\n", pid);
+    if(debug)printf("IPC proc_exit: pid = %d\n", pid);
     
     if (release_semaphores(pid) != OK)
 		printf("Error in do_procsem_exit()\n");

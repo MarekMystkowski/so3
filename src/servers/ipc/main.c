@@ -38,18 +38,14 @@ static int sef_cb_init_fresh(int type, sef_init_info_t *info);
 static void sef_cb_signal_handler(int signo);
 int main(int argc, char *argv[])
 {
-	printf("IPC server started.\n");
-	message m, m2;
-	
-	
+	message m;
 	
 	/* SEF local startup. */
 	env_setargs(argc, argv);
 	sef_local_startup();
 	
 	/* sending message to server PM */
-	if( _syscall(PM_PROC_NR, START_IPC, &m2))
-		printf("ERROR IN IPC MAIN: %d\n", errno);
+	_syscall(PM_PROC_NR, START_IPC, &m);
 	
 	while (TRUE) {
 		int r;
@@ -126,12 +122,7 @@ int main(int argc, char *argv[])
 		update_refcount_and_destroy();
 	}
 
-	/* no way to get here */
-	
-	printf("Server IPC stoped.\n");
-	/* sending message to server PM */
-    _syscall(PM_PROC_NR, STOP_IPC, &m);
-    
+	/* no way to get here */    
 	return -1;
 }
 
@@ -175,6 +166,10 @@ static void sef_cb_signal_handler(int signo)
 {
   /* Only check for termination signal, ignore anything else. */
   if (signo != SIGTERM) return;
+  	
+	/* sending message to server PM */
+	message m;
+	_syscall(PM_PROC_NR, STOP_IPC, &m);
 
   /* Checkout if there are still IPC keys. Inform the user in that case. */
   if (!is_sem_nil() || !is_shm_nil())
